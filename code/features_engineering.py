@@ -83,14 +83,14 @@ def cut_df_into_10_(df):
         #total.append(pd.concat([df2, df3], axis= 1))
 
     # 处理方向d的切分，切分成bins_num档
-    bins_num = 12
-    labels = ['d_' + str(i+1) + '_level' for i in range(bins_num)]
+    bins_num = range(0, 361, 30)
+    labels = ['d_' + str(i+1) + '_level' for i, _ in enumerate(bins_num) if i < 12]
     df_d = pd.cut(df['d'], bins= bins_num, labels= labels)
     for suffix in ['_num', '_prop']:
         df_d_suffix = df_d.value_counts(normalize= True) if suffix == '_prop' else df_d.value_counts()
         df_d_suffix.index = df_d_suffix.index.map(lambda x:x + suffix)
         # 将所得的Series的index换做columns，仅一条，所以index设为0
-        df_d_suffix = pd.DataFrame((df_d_suffix.values).reshape(1, bins_num), index= [0], columns= df_d_suffix.index.values.tolist())
+        df_d_suffix = pd.DataFrame((df_d_suffix.values).reshape(1, 12), index= [0], columns= df_d_suffix.index.values.tolist())
         df_d_suffix = df_d_suffix[[x + suffix for x in labels]]
         total.append(df_d_suffix)
     # 最后合并
@@ -200,9 +200,9 @@ def features_engineering(mode= 'train'):
         df = df.groupby(by='ship')
         # 找出整个过程中方向之和小于100的ship，作为无效数据
         def d(df):
-            return (df['d'].sum())
+            return (df[['d', 'v']].sum())
         df1 = df.apply(d)
-        invalid_ship = df1[df1 < 100].index.tolist()
+        invalid_ship = df1[(df1['d'] < 300)&(df1['v'] < 100)].index.tolist()
 
     csvs_dir = train_csvs_dir if mode == 'train' else test_csvs_dir
 
@@ -248,8 +248,8 @@ def features_engineering(mode= 'train'):
         #i +=1
     dataset_df = pd.concat(df_list, axis= 0)
     print(dataset_df.shape)
-    dataset_df.to_hdf(r'C:\Users\Nolan\Desktop\py\Inteligent_Ocean\Dataset\dataset_after_preprocess' + '\\' +mode + '.h5', key= 'df', mode= 'w')
-    (dataset_df.reset_index()).to_hdf(r'C:\Users\Nolan\Desktop\py\Inteligent_Ocean\Dataset\dataset_after_preprocess' + '\\' + mode + '_reset.h5',key= 'df', mode= 'w')
+    dataset_df.to_hdf(r'C:\Users\Nolan\Desktop\py\Inteligent_Ocean\Dataset\dataset_after_preprocess' + '\\' +mode + '_modified.h5', key= 'df', mode= 'w')
+    (dataset_df.reset_index()).to_hdf(r'C:\Users\Nolan\Desktop\py\Inteligent_Ocean\Dataset\dataset_after_preprocess' + '\\' + mode + '_modified_reset.h5',key= 'df', mode= 'w')
 
 
 
@@ -290,7 +290,7 @@ class TEST(object):
 
     @staticmethod
     def test_features_engineering():
-        #features_engineering()
+        features_engineering()
         features_engineering(mode= 'test')
 
 

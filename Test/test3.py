@@ -8,32 +8,19 @@ warnings.filterwarnings('ignore')
 pd.set_option('display.max_columns', 200)
 pd.set_option('display.max_rows', None)
 
-features = FEATURES_1.copy()
-features.remove('type')
-'''
+test_hdf = r'C:\Users\Nolan\Desktop\py\Inteligent_Ocean\Dataset\dataset_after_preprocess\test_reset.h5'
+train_hdf = r'C:\Users\Nolan\Desktop\py\Inteligent_Ocean\Dataset\dataset_after_preprocess\train_reset.h5'
+
+features = FEATURES.copy()
+
 for temp in ['ship', 'type']:
     features.remove(temp)
-'''
-train_label = pd.read_hdf(
-    r'C:\Users\Nolan\Desktop\py\Inteligent_Ocean\Dataset\dataset_after_preprocess\train_reset.h5', key='df')
-#train_label.drop('index', axis=1, inplace=True)
-train_label = train_label[features]
 
-#train_label.drop('ship', axis=1, inplace=True)
-test_label = pd.read_hdf(
-    r'C:\Users\Nolan\Desktop\py\Inteligent_Ocean\Dataset\dataset_after_preprocess\test_reset.h5', key='df')
-#test_label.drop('index', axis=1, inplace=True)
-#test_label = test_label[features]
-#print(train_label.shape)
-#print(test_label.index)
-#print(test_label.head(10))
-#print(test_label['ship'])
-#print(test_label.ship)
-a = 0
-b = np.array([2, 5])
-print(a + b)
+train_data = pd.read_hdf(train_hdf, key='df')
 
-bins = range(0, 361, 30)
-print('bins:', bins)
-for i in bins:
-    print(i)
+test_data = pd.read_hdf(test_hdf, key='df')
+# test_label.drop('index', axis=1, inplace=True)
+# 找出标签和船号
+train_label = train_data['type']
+print(train_label.values.shape)
+

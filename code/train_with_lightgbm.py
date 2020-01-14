@@ -7,7 +7,7 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn import metrics
 import warnings
 import matplotlib.pyplot as plt
-from  CONFIG.CONFIG import FEATURES, FEATURES_1
+from  CONFIG.CONFIG import FEATURES, FEATURES_1, FEATURES_2
 import copy
 
 
@@ -19,12 +19,12 @@ def train_predict():
         features.remove(temp)
 
     train_data = pd.read_hdf(
-        r'C:\Users\Nolan\Desktop\py\Inteligent_Ocean\Dataset\dataset_after_preprocess\train_reset.h5', key='df')
+        r'C:\Users\Nolan\Desktop\py\Inteligent_Ocean\Dataset\dataset_after_preprocess\train_modified_reset.h5', key='df')
     #train_label.drop('index', axis=1, inplace=True)
 
     #train_label.drop('ship', axis=1, inplace=True)
     test_data = pd.read_hdf(
-        r'C:\Users\Nolan\Desktop\py\Inteligent_Ocean\Dataset\dataset_after_preprocess\test_reset.h5', key='df')
+        r'C:\Users\Nolan\Desktop\py\Inteligent_Ocean\Dataset\dataset_after_preprocess\test_modified_reset.h5', key='df')
     #test_label.drop('index', axis=1, inplace=True)
     # 找出标签和船号
     train_label = train_data['type']
@@ -64,6 +64,7 @@ def train_predict():
     }
     '''
     params = {
+        'learning_rate': 0.1,
         'n_estimators': 5000,
         'boosting_type': 'gbdt',
         'objective': 'multiclass',
