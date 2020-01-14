@@ -194,6 +194,16 @@ def unique_process(df):
 
 
 def features_engineering(mode= 'train'):
+    if mode == 'train':
+        h5_path = r'C:\Users\Nolan\Desktop\py\Inteligent_Ocean\tianchi_ship_2019-master\dataset\train.h5'
+        df = pd.read_hdf(h5_path)
+        df = df.groupby(by='ship')
+        # 找出整个过程中方向之和小于100的ship，作为无效数据
+        def d(df):
+            return (df['d'].sum())
+        df1 = df.apply(d)
+        invalid_ship = df1[df1 < 100].index.tolist()
+
     csvs_dir = train_csvs_dir if mode == 'train' else test_csvs_dir
 
     fun_list = ['max', 'min', 'mean', 'std', 'skew', 'sum']
@@ -206,6 +216,10 @@ def features_engineering(mode= 'train'):
             break
         '''
         df = pd.read_csv(csv_path)
+        # 判断数据有效性
+        if mode == 'train' and df['渔船ID'].unique() in invalid_ship:
+                continue
+
         if mode == 'train':
             df.columns = ['ship','x','y','v','d','time','type']
             label = LABEL_DICT[df['type'].unique()[-1]]

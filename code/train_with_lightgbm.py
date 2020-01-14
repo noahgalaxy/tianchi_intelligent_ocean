@@ -69,37 +69,44 @@ def train_predict():
         'objective': 'multiclass',
         'num_class': 3,
         'early_stopping_rounds': 100,
+        #'learning_rate': 0.3
     }
 
 
-    fold = StratifiedKFold(n_splits= 5, shuffle=True, random_state=42)
-    models = []
+    fold = StratifiedKFold(n_splits= 10, shuffle=True, random_state=42)
+    # 初始值设置
     pred = 0
-
-    print('pred', pred)
-
-
+    score = 0
+    train_pred_start = 0
     # 对每一折遍历
-    for index, (train_idx, val_idx) in enumerate(fold.split(train_data, train_label)):
-        print(f'{index+1} start!!')
-        # fold.split(X, y)返回的是分割后的索引的生成器
+    for i, (train_idx, val_idx) in enumerate(fold.split(train_data, train_label)):
+        print(f'No.{i + 1}开始')
+        # fold.split(train_data, train_label)返回的是分割后的索引的生成器
         # 制作lgb的训练集和验证集
         train_set = lgb.Dataset(train_data.iloc[train_idx], train_label.iloc[train_idx])
         val_set = lgb.Dataset(train_data.iloc[val_idx], train_label.iloc[val_idx])
 
         model = lgb.train(params, train_set, valid_sets= val_set, verbose_eval=100)
-        models.append(model)
-        val_pred = model.predict(train_data.iloc[val_idx])
+
+        # 获取最佳预测结果
+        val_pred = model.predict(train_data.iloc[val_idx], num_iteration= model.best_iteration)
 
         val_y = train_label.iloc[val_idx]
         val_pred = np.argmax(val_pred, axis=1)
-        print(index, 'val f1', metrics.f1_score(val_y, val_pred, average='macro'))
+        f1_score = metrics.f1_score(val_y, val_pred, average='macro')
+        score += f1_score
+        print(f'No.{i + 1}轮交叉验证f1_score:', f1_score)
+        # 测试集预测
+        test_pred = model.predict(test_data, num_iteration= model.best_iteration)
+        pred += test_pred / 5.
+        # 训练集预测
+        train_pred = model.predict(train_data, num_iteration= model.best_iteration)
+        train_pred_start += train_pred / 5.
 
-        test_pred = model.predict(test_data)
-        pred += test_pred/5
-
+    print('average f1score:', score / (i + 1))
+    print('全部数据 f1 score:', metrics.f1_score(train_label, np.argmax(train_pred_start, axis= 1), average='macro'))
     label_dict = {0: '围网', 1:'拖网', 2: '刺网'}
-    pred = np.argmax(pred, axis=1)
+    pred = np.argmax(pred / 5., axis=1)
     # 将得到的np数组做成pd.Serise,便于后面拼接
     pred = pd.Series(pred)
     # 拼接Series
@@ -111,6 +118,6 @@ def train_predict():
     print(test_pred['pred'].value_counts(normalize= True))
     print(test_pred.shape)
     print('=='*22)
-    test_pred.to_csv(r'C:\Users\Nolan\Desktop\py\Inteligent_Ocean\Dataset\Results\result__2.csv', index= False, header= None)
+    test_pred.to_csv(r'C:\Users\Nolan\Desktop\py\Inteligent_Ocean\Dataset\Results\result__1.csv', index= False, header= None)
 if __name__ == '__main__':
     train_predict()

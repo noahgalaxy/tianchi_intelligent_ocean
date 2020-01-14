@@ -32,3 +32,8 @@ test_label = pd.read_hdf(
 a = 0
 b = np.array([2, 5])
 print(a + b)
+
+bins = range(0, 361, 30)
+print('bins:', bins)
+for i in bins:
+    print(i)
