@@ -99,15 +99,15 @@ def train_predict():
         print(f'No.{i + 1}轮交叉验证f1_score:', f1_score)
         # 测试集预测
         test_pred = model.predict(test_data, num_iteration= model.best_iteration)
-        pred += test_pred / 5.
+        pred += test_pred / 10.
         # 训练集预测
         train_pred = model.predict(train_data, num_iteration= model.best_iteration)
-        train_pred_start += train_pred / 5.
+        train_pred_start += train_pred / 10.
 
     print('average f1score:', score / (i + 1))
     print('全部数据 f1 score:', metrics.f1_score(train_label, np.argmax(train_pred_start, axis= 1), average='macro'))
     label_dict = {0: '围网', 1:'拖网', 2: '刺网'}
-    pred = np.argmax(pred / 5., axis=1)
+    pred = np.argmax(pred, axis=1)
     # 将得到的np数组做成pd.Serise,便于后面拼接
     pred = pd.Series(pred)
     # 拼接Series
